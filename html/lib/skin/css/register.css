@@ -120,3 +120,24 @@ input[type=radio]{
   color: red;
   font-style:italic;
 }
+
+input[type=submit] {
+   height: 35px;
+}
+
+input {
+border: 1px solid #CCC;
+border-top: 1px solid #999;
+border-radius: 3px;
+-moz-border-radius: 3px;
+-webkit-border-radius: 3px;
+display: block;
+font-size: 18px;
+height: 25px;
+margin: 0 auto 15px;
+padding: 5px;
+transition: all 0.3s ease;
+-moz-transition: all 0.3s ease;
+-webkit-transition: all 0.3s ease;
+width: 300px;
+}

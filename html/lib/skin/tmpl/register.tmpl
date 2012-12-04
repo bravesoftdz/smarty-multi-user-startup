@@ -1,4 +1,5 @@
 {include file="header.tmpl" title="Register"}
+<script src="jquery.placeholder.js"></script>
 <script src="lib/skin/js/register.js"></script>
 <link href="lib/skin/css/register.css" rel="stylesheet" type="text/css" />
 {{if $registration_complete}}
@@ -38,14 +39,21 @@ File Attachments
 </li>
 </div>
 {{/foreach}}
-
-
-
 <br style="clear: both"/><br>
-<label>Organization Name <input type="text" name="org_name" value="{$smarty.post.org_name|default:''}"></label>
-<br>
-<label>Organization Shortname <input type="text" name="org_login" value="{$smarty.post.org_login|default:''}"></label>
-<br>
+  <p>
+    <span class="field"><input placeholder="Your full name" type="text" name="name" id="name" value="{$smarty.post.name|default:''}"/></span>
+  </p>
+  <p>
+    <span class="field"><input placeholder="Company or Organization" type="text" name="org_name" id="org_name" value="{$smarty.post.org_name|default:''}"/></span>
+  </p>
+  <p>
+    <span class="field"><input placeholder="Email" type="text" name="email" id="email" value="{$smarty.post.email|default:''}"/></span>
+  </p>
+  <p>
+    <span class="field"><input placeholder="Password" type="password" name="password" id="password"/></span>
+  </p>
+
+
 <input type="submit" value="Register"/>
 </form>
 {{/if}}
