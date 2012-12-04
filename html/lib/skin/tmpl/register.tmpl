@@ -1,0 +1,52 @@
+{include file="header.tmpl" title="Register"}
+<script src="lib/skin/js/register.js"></script>
+<link href="lib/skin/css/register.css" rel="stylesheet" type="text/css" />
+{{if $registration_complete}}
+Thank you for registering
+{{else}}
+<form name="frmRegister" method="POST">
+{{foreach $plans as $plan}}
+<div class="planbox">
+
+<h3{{if $plan.shortname == 'proteam'}} class="featured"{{/if}}>{$plan.name}</h3>
+<p>
+<span class="currency">$</span><span class="plan_cost">{$plan.cost}</span><span class="slash">/</span><span class="plan_cycle">{if $plan.charge_cycle == 'yearly'}year{/if}</span>
+<br class="clear">
+</p>
+<ul>
+<li class="plan_max_users">
+Max Users
+<strong>{$plan.max_users}</strong>
+</li>
+<li class="plan_max_projects">
+Max Projects
+<strong>{$plan.max_projects}</strong>
+</li>
+<li class="plan_allow_email_submissions">
+Email Bug Submissions
+<strong>{{if $plan.allow_email_bug_submissions}}Yes{{else}}No{{/if}}</strong>
+</li>
+<li class="plan_allow_file_attachments">
+File Attachments
+<strong>{{if $plan.allow_file_attachments}}Yes{{else}}No{{/if}}</strong>
+</li>
+<li>
+   Choose <b>{$plan.name}</b><br>
+   {{if $plan.shortname != 'free'}}<span class="freefor30">Free for 30 days</span>{{/if}}<br>
+   <input class="regular-radio big-radio" type="radio" name="plan" id="plan-{$plan.shortname}" value="{$plan.shortname}" {{if isset($smarty.post.plan) && $smart.post.plan == $plan.shortname}}checked=checked{{/if}}/>
+   <label for="plan-{$plan.shortname}"></label>
+</li>
+</div>
+{{/foreach}}
+
+
+
+<br style="clear: both"/><br>
+<label>Organization Name <input type="text" name="org_name" value="{$smarty.post.org_name|default:''}"></label>
+<br>
+<label>Organization Shortname <input type="text" name="org_login" value="{$smarty.post.org_login|default:''}"></label>
+<br>
+<input type="submit" value="Register"/>
+</form>
+{{/if}}
+{include file="footer.tmpl"}

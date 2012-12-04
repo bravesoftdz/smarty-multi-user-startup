@@ -1,0 +1,2 @@
+#do not store usernames and passwords in git repo history
+html/lib/config.inc.php

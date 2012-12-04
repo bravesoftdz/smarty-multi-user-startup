@@ -1,0 +1,18 @@
+{include file="header.tmpl" title=""}
+hello world
+
+<pre>
+User Information:
+
+Name: {$name|capitalize}
+Addr: {$address|escape}
+Date: {$smarty.now|date_format:"%b %e, %Y"}
+</pre>
+
+{foreach $errors as $error}
+{strip}
+{$error}<br>
+{/strip}
+{/foreach}
+
+{include file="footer.tmpl"}

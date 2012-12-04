@@ -1,0 +1,122 @@
+.planbox {
+    float: left;
+    height: 35.16em;
+    width: 10em;
+    border 1px dashed gray;
+    background-color: #EFEFEF;
+    margin: 1em;
+    overflow:hidden; text-overflow: ellipsis;
+    text-align: center;
+
+    border: 2px solid #F1F1F1;
+    margin: 0 16px;
+    box-shadow: 0px 5px 10px 1px #C1BFBF;
+    -webkit-box-shadow: 0px 5px 10px 1px #C1BFBF;
+    box-shadow: 0px 5px 10px 1px #C1BFBF;
+}
+
+h1, h2, h3, h4 {
+color: #444;
+font-family: "nimbus-sans-condensed",sans-serif;
+font-weight: 700;
+padding: 0;
+text-transform: uppercase;
+}
+
+
+.planbox  h3.featured {
+   background-color: #ccffcc;
+}
+
+.planbox h3 {
+background: #D2D2D2;
+border-bottom: 2px solid #F1F1F1;
+font-size: 30px;
+line-height: 64px;
+text-align: center;
+text-shadow: 0px 2px 0.05em white;
+margin-top: 0px;
+margin-bottom: 8px;
+-webkit-box-shadow: inset 0px 0px 6px 6px rgba(0, 0, 0, 0.05);
+box-shadow: inset 0px 0px 6px 6px rgba(0, 0, 0, 0.05);
+}
+
+.planbox .plan_cycle {
+   font-size: 20px;
+}
+
+
+.planbox .currency, .planbox slash, .planbox plan_cycle {
+    font-style: normal;
+    line-height: 30px;
+    padding-top: 6px;
+}
+
+
+.planbox .plan_cost {
+font-size: 80px;
+line-height: 80px;
+letter-spacing: -2px;
+font-weight: bold;
+}
+
+
+.planbox p {
+    color: #444;
+    display: block;
+    font-size: 32px;
+    margin: 0 auto 8px auto;
+    line-height: 1.5em;
+}
+
+.planbox li {
+    border-top: 1px solid white;
+    border-bottom: 1px solid #CCC;
+    color: #666;
+    padding: 16px 0;
+    text-align: center;
+}
+
+.planbox ul {
+border-top: 1px solid #CCC;
+padding: 0;
+list-style: none;
+clear: both;
+}
+
+.planbox strong {
+color: #444;
+display: block;
+font-family: "nimbus-sans-condensed",sans-serif;
+font-size: 22px;
+font-weight: 700;
+line-height: 1em;
+}
+
+.plan_name{
+  font-weight: bold;
+  font-size: 2.3em;
+}
+
+.planbox .currency, .planbox .plan_cost, .planbox .slash, .planbox .plan_cycle {
+    display: block;
+    float: left;
+    text-shadow: 0 2px 1px white;
+    font-family: "nimbus-sans-condensed",sans-serif;
+    font-weight: 700;
+}
+
+.value { 
+   font-size: 2.5em; 
+   font-weight: bold; 
+}
+
+input[type=radio]{
+   width: 1em;
+   height: 1em;
+}
+
+.freefor30{
+  color: red;
+  font-style:italic;
+}
