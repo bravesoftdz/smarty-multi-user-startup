@@ -5,10 +5,9 @@
 {{if $registration_complete}}
 Thank you for registering.
 Please check your email to verify your new account.
+This link will expire in 24 hours.
 {{else}}
 <form name="frmRegister" method="POST">
-
-
 {{if !empty($error)}}
 <div class="error">
 Error: {$error.message}

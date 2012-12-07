@@ -159,7 +159,7 @@
            $org_login_result = $org_login;
            $too_many_tries_count = 25;
            $suffix_num = 2;
-           while (($org = self::FindOrganizationByLogin($org_login_result)) || $suffix_num < $too_many_tries_count){
+           while (($org = self::FindOrganizationByLogin($org_login_result)) && $suffix_num < $too_many_tries_count){
                 $org_login_result = $org_login.$suffix_num;
                 $suffix_num++;
            }           
@@ -345,11 +345,11 @@
                 
                 //email was successfully sent, go ahead and insert it into the database now
                 $sql = "INSERT INTO users (id, organization_id, username, password, email, email_verified, 
-                                           phone, name, street1, street2, city, state, zip, country, 
-                                           verify_code, verify_action, verify_param) VALUES 
+                                           phone, name, street1, street2, city, state, zip, country, date_added, date_updated,
+                                           verify_code, verify_action, verify_param, verify_date_expires) VALUES 
                                           (NULL, :org_id, :username, :hashed_password, :email, 0,
-                                           '', :name, '', '', '', '', '', '',
-                                           :verify_code, 'initial_email_verification', :email)";
+                                           '', :name, '', '', '', '', '', '', NOW(), NOW(), 
+                                           :verify_code, 'initial_email_verification', :email, NOW() + INTERVAL 24 hour)";
                 $prep = site::getPDO()->prepare($sql);
                 $res = $prep->execute(array(':org_id'=> $org_id, 
                                      ':username' => $username, 
