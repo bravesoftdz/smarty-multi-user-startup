@@ -1,17 +1,35 @@
 {include file="header.tmpl" title="Register"}
-<script src="jquery.placeholder.js"></script>
+<script src="lib/skin/js/jquery.placeholder.js"></script>
 <script src="lib/skin/js/register.js"></script>
 <link href="lib/skin/css/register.css" rel="stylesheet" type="text/css" />
 {{if $registration_complete}}
-Thank you for registering
+Thank you for registering.
+Please check your email to verify your new account.
 {{else}}
 <form name="frmRegister" method="POST">
+
+
+{{if !empty($error)}}
+<div class="error">
+Error: {$error.message}
+<script>
+$( function() { 
+    $('input[name={$error.form_field}]').addClass('error');
+} );
+</script>
+</div>
+{{/if}}
+
+<div id="planboxes">
 {{foreach $plans as $plan}}
 <div class="planbox">
-
 <h3{{if $plan.shortname == 'proteam'}} class="featured"{{/if}}>{$plan.name}</h3>
 <p>
+{{if $plan.shortname == 'free'}}
+<span class="plan_cost">free</span>
+{{else}}
 <span class="currency">$</span><span class="plan_cost">{$plan.cost}</span><span class="slash">/</span><span class="plan_cycle">{if $plan.charge_cycle == 'yearly'}year{/if}</span>
+{{/if}}
 <br class="clear">
 </p>
 <ul>
@@ -34,11 +52,12 @@ File Attachments
 <li>
    Choose <b>{$plan.name}</b><br>
    {{if $plan.shortname != 'free'}}<span class="freefor30">Free for 30 days</span>{{/if}}<br>
-   <input class="regular-radio big-radio" type="radio" name="plan" id="plan-{$plan.shortname}" value="{$plan.shortname}" {{if isset($smarty.post.plan) && $smart.post.plan == $plan.shortname}}checked=checked{{/if}}/>
+   <input class="regular-radio big-radio" type="radio" name="plan" id="plan-{$plan.shortname}" value="{$plan.shortname}" {{if isset($smarty.post.plan) && $smarty.post.plan == $plan.shortname}}checked=checked{{/if}}/>
    <label for="plan-{$plan.shortname}"></label>
 </li>
 </div>
 {{/foreach}}
+</div>
 <br style="clear: both"/><br>
   <p>
     <span class="field"><input placeholder="Your full name" type="text" name="name" id="name" value="{$smarty.post.name|default:''}"/></span>

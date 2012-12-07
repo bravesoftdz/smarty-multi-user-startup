@@ -1,6 +1,8 @@
-/* Below css comes http://www.inserthtml.com/demo/webkit-form/index2.html */body {
+/* Below css comes http://www.inserthtml.com/demo/webkit-form/index2.html */
+body {
 	background: #fff;
 	padding: 0; margin: 0;
+    font-family: sans-serif;
 }
 
 #holder {

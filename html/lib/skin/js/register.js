@@ -8,4 +8,8 @@ $(function(){
           }
        });        
    }
+   
+   $('.planbox').click(function(){ 
+      $(this).find('input[name=plan]').prop('checked', true);
+   });
 });
