@@ -130,12 +130,14 @@
             if ($plan['charge_cycle'] == 'yearly'){
                $date_expires = date("Y-m-d H:i:s", strtotime('+1 year'));
             }
-            $sql = 'INSERT INTO organizations (login, name, plan_id, date_created, date_expires) VALUES (:login, :name, :plan_id, NOW(), :date_expires)';
+            $sql = 'INSERT INTO organizations (login, name, plan_id, date_created, date_expires) VALUES (:login, :name, :plan_id, NOW(), NOW() + INTERVAL 30 day)';
             $prep = site::getPDO()->prepare($sql);
-            if (!$prep->execute(array(':login'=>$org_login, ':name'=>$org_name,':plan_id' => (int)$plan['id'], ':date_expires'=>$date_expires))){
+            if (!$prep->execute(array(':login'=>$org_login, ':name'=>$org_name,':plan_id' => (int)$plan['id']))){
               return self::CreateError('', 'db_insert_org_failure', $prep->errorInfo());
             }
-            return site::getPDO()->lastInsertId();
+            $org_id = site::getPDO()->lastInsertId();
+            site::log('CREATEORGANIZATION', $org_login.'(org_id: '.$org_id.') '.$org_name.' on plan '.$plan['shortname']);
+            return $org_id;
        }
        
        
@@ -205,6 +207,7 @@
         */
        public static function NewAccount($plan, $full_name, $org_name, $email, $password)
        {
+            
             if (!self::ValidFullName($full_name)){
               return self::CreateError('name', 'invalid_fullname', 'Please include your first and last name');               
             }
@@ -234,8 +237,9 @@
                       'Organization login must start with a letter, end with a letter or digit, and contain letters, digits, or underscores in between.');
             } 
 
-            $org_login = $available_org_login;
+           $org_login = $available_org_login;
            
+           site::log('NEWACCOUNTATTEMPT', $plan.', '.$full_name.', '.$org_name.', '.$email.', generated login name: '.$org_login);
            
            $org_id = Membership::CreateOrganization($org_login, $org_name, $plan);
            if (is_array($org_id)){
@@ -320,17 +324,18 @@
 
                 try {
                   $mail->AddAddress($email, $name);
-                  $mail->SetFrom('noreply@clearbugs.com', 'Clearbugs');
-                  $mail->AddReplyTo('support@clearbugs.com', 'First Last');
+                  $mail->SetFrom('noreply@clearbugs.com', 'ClearBugs');
+                  $mail->AddReplyTo('support@clearbugs.com', 'ClearBugs');
                   $mail->Subject = 'Clearbugs Registration Confirmation';
                   //$mail->AltBody = // optional - MsgHTML will create an alternate automatically
                   $mail->MsgHTML('<body style="margin: 10px">
                                  <img align="left" src="lib/skin/images/bugkiller.png"/>
-                                 Welcome to Clearbugs<br>
+                                 Welcome to <b>Clearbugs</b><br>
                                  To complete your registration, please go to the link below<br>
                                  <a href="'.$verify_link.'">'.$verify_link.'</a><br>
+                                 This link will expire in 24 hours. <br>
                                  Thank you, <br>
-                                 ClearBugs <br>
+                                 <b>ClearBugs</b> <br>
                                  </body>');
                   $mail->AddAttachment('lib/skin/images/bugkiller.png');      // attachment
                   $mail->Send();
@@ -361,6 +366,7 @@
                 if (!$res){
                    return self::CreateError('','db_insert_user_failure',$prep->errorInfo());
                 }
+                site::log('CREATEUSER', $username.' at '.$org['login'].'(org_id: '.$org_id.')');
                 return site::getPDO()->lastInsertId();
         }
     }
