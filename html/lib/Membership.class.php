@@ -327,16 +327,11 @@
                   $mail->SetFrom('noreply@clearbugs.com', 'ClearBugs');
                   $mail->AddReplyTo('support@clearbugs.com', 'ClearBugs');
                   $mail->Subject = 'Clearbugs Registration Confirmation';
+                  $s = site::getSmarty();
+                  $s->assign('verify_link', $verify_link);
+                  $email_html = $s->fetch('register_email_confirm.tmpl');
                   //$mail->AltBody = // optional - MsgHTML will create an alternate automatically
-                  $mail->MsgHTML('<body style="margin: 10px">
-                                 <img align="left" src="lib/skin/images/bugkiller.png"/>
-                                 Welcome to <b>Clearbugs</b><br>
-                                 To complete your registration, please go to the link below<br>
-                                 <a href="'.$verify_link.'">'.$verify_link.'</a><br>
-                                 This link will expire in 24 hours. <br>
-                                 Thank you, <br>
-                                 <b>ClearBugs</b> <br>
-                                 </body>');
+                  $mail->MsgHTML($email_html);
                   $mail->AddAttachment('lib/skin/images/bugkiller.png');      // attachment
                   $mail->Send();
                 } catch (phpmailerException $e) {
