@@ -2,23 +2,14 @@
 <script src="lib/skin/js/jquery.placeholder.js"></script>
 <script src="lib/skin/js/register.js"></script>
 <link href="lib/skin/css/register.css" rel="stylesheet" type="text/css" />
+<link href="lib/skin/css/form.css" rel="stylesheet" type="text/css" />
 {{if $registration_complete}}
 Thank you for registering.
 Please check your email to verify your new account.
 This link will expire in 24 hours.
 {{else}}
 <form name="frmRegister" method="POST">
-{{if !empty($error)}}
-<div class="error">
-Error: {$error.message}
-<script>
-$( function() { 
-    $('input[name={$error.form_field}]').addClass('error');
-} );
-</script>
-</div>
-{{/if}}
-
+{include file="form_messages.tmpl"}
 <div id="planboxes">
 {{foreach $plans as $plan}}
 <div class="planbox">

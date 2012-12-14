@@ -19,5 +19,19 @@ class misc
             if (!empty($key2)){ return isset($ary[$key][$key2]) ? $ary[$key][$key2] : $defaultval; } 
             else { return isset($ary[$key]) ? $ary[$key] : $defaultval; }
        }
+       
+       public static function getRandomAlphaNumericString($length = 8) {
+          $validCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+          $validCharNumber = strlen($validCharacters);
+       
+          $result = "";
+       
+          for ($i = 0; $i < $length; $i++) {
+              $index = mt_rand(0, $validCharNumber - 1);
+              $result .= $validCharacters[$index];
+          }
+       
+          return $result;
+      }
 }       
 ?>

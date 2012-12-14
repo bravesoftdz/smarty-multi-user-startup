@@ -9,6 +9,182 @@
 
     class Membership
     {
+       public static function SessionStart($opts = array()){
+          session_start();
+          if (!is_array($opts)){ $opts = array(); }
+          
+          $default_opts = array('login'=>'FORCE',
+                                //the page the browser goes to if it fails
+                                'onfailure-redirect'=>'login.php?goto='.urlencode($_SERVER['HTTP_REFERER']) //go to the login page on a failure
+                          );
+          
+          $opts = array_merge($default_opts, $opts);
+          
+          switch(strtoupper($opts['login'])){
+             case 'ALLOW':
+                 //do nothing, session_start() was already called
+             break;
+             case 'ADMIN-ONLY':
+                 //force an admin user only
+                 if (self::IsLoggedIn() && $_SESSION['user']['username'] == 'admin'){
+                     return true;
+                 }else{
+                     if (!empty($opts['onfailure-redirect'])){ 
+                        header('Location: '.$opts['onfailure-redirect']);
+                        exit;
+                     }else{
+                        return false;
+                     }                    
+                 }
+             break;
+             case 'FORCE':
+                if (!self::IsLoggedIn()){
+                  if (!empty($opts['onfailure-redirect'])){ 
+                     header('Location: '.$opts['onfailure-redirect']);
+                     exit;
+                  }else{
+                     return false;
+                  }
+                }
+                else {
+                  return true;
+                }
+             break;
+          }
+       
+       }
+    
+      /** 
+       * Perform a login, thus adding the user to the SESSION
+       * And also creating a user token
+       */
+      public static function Login($org_login, $username, $password)
+      {
+         site::log('LOGINATTEMPT', $org_login.'@'.$username);
+         
+         $sql = "SELECT * FROM organizations WHERE LOWER(login) = LOWER(:org_login)";
+         $prep = site::getPDO()->prepare($sql);
+         $prep->execute(array(':org_login'=>$org_login));
+         $org = $prep->fetch(PDO::FETCH_ASSOC);
+         if (!$org){ return self::CreateError('org_login', 'INVALIDORG', 'The organization does not exist'); }
+
+         if (strpos($username, '@') !== false){
+            //match by email address
+            $email = $username;
+            $sql = "SELECT * FROM email WHERE LOWER(email) = LOWER(:email)";
+            $prep = site::getPDO()->prepare($sql);
+            $prep->execute(array(':email'=>$email));
+            $user = $prep->fetch(PDO::FETCH_ASSOC);
+            if (!$user){ return self::CreateError('username', 'INVALIDUSER', 'The email does not exist within this organization'); } 
+         }else{ //match by username
+            $sql = "SELECT * FROM users WHERE LOWER(username) = LOWER(:username)";
+            $prep = site::getPDO()->prepare($sql);
+            $prep->execute(array(':username'=>$username));
+            $user = $prep->fetch(PDO::FETCH_ASSOC);
+            if (!$user){ return self::CreateError('username', 'INVALIDUSER', 'The username does not exist within this organization'); }
+         }
+         
+         if (!self::VerifyHashedPassword($password, $user['password'])){
+            return self::CreateError('password', 'INVALIDPASSWORD', 'The password provided was incorrect');
+         }
+         //login credentials were correct, next step is to modify the $_SESSION to show that we are logged in
+         $_SESSION['loggedin'] = time();
+         $_SESSION['org'] = $org;
+         $_SESSION['user'] = $user;
+         $token = misc::getRandomAlphaNumericString(40);
+         $sql = "INSERT INTO tokens (token, ip, organization_id, user_id, date_created, date_accessed)
+                              VALUES(:token, :ip, :org_id, :user_id, NOW(), NOW());";
+         $prep = site::getPDO()->prepare($sql); 
+         $prep->execute(array(':token'=>$token, 
+                                 ':ip'=>$_SERVER['REMOTE_ADDR'], 
+                             ':org_id'=>$org['id'], 
+                            ':user_id'=>$user['id']));
+         if ($prep->rowCount() == 0){
+            return self::CreateError('','INSERTTOKENFAILURE', 'There could possibly be a duplicate token (yeah right the chances of that are like 1 in 500 billion');
+         }
+         $_SESSION['token'] = $token; 
+
+         //go ahead and update the access token
+         self::UpdateAccessToken();
+
+         
+         return true;
+      }
+      
+      /** 
+       * Logout of a user's session, the current logged in user, 
+       * or a specific user given their token
+       * @return integer the number of tokens deleted
+       */
+      public static function Logout($token = null){
+         session_start(); //does nothing if already started
+         $destroysession = true;
+         if (empty($token)){ 
+            if (isset($_SESSION['token'])){
+               $token = $_SESSION['token'];
+            }else{
+               return false; //could not destroy empty token
+            }
+         }else{
+           //a token was supplied therefore we won't destroy the session
+           $destroysession = false;
+         }
+         
+         if ($destroysession){
+            session_unset();
+            session_destroy();
+            $_SESSION = array();
+         }
+         
+         if (!empty($token)){
+            $sql = "DELETE FROM tokens WHERE token = :token";
+            $prep = site::getPDO()->prepare($sql);
+            echo $prep->execute(array(':token'=> $token));
+            return $prep->rowCount();
+         }
+         return 0; //no tokens modified
+      }
+      
+      /**
+       * Update the access token with the current time and current page
+       * @see LOGIN_EXPIRE_INTERVAL
+       * @return bool false if token not found, user_id and organization doesnt match, or access has expired
+       */
+      public static function UpdateAccessToken(){
+            if (empty($_SESSION['token'])){ return false; }
+            
+            $sql = "UPDATE tokens SET date_accessed = NOW(), microtime_accessed = :microtime, page_accessed = :curpage
+                    WHERE token = :token 
+                      AND organization_id = :org_id 
+                      AND user_id = :user_id
+                      AND NOW() <= date_accessed + ".LOGIN_EXPIRE_INTERVAL;
+                      
+            $prep = site::getPDO()->prepare($sql);
+            $prep->execute(array(':token'=>$_SESSION['token'], 
+                                 ':microtime'=> microtime(true), 
+                                 ':curpage'=> $_SERVER['REQUEST_URI'],
+                                 ':org_id'=>$_SESSION['org']['id'],
+                                 ':user_id'=>$_SESSION['user']['id'])
+                          );
+            //we included microtime to ensure that a value always gets updated when this runs, if this fails then the token has expired
+            //if nothing was found, the token could be invalid
+            return ($prep->rowCount() === 1);    
+      }
+      
+      
+       /** 
+        * Check whether the user is logged in to the session AND that the user and organization exist
+        * And check if the token is valid
+        * @return true on user logged in, false on failure
+        */
+       public static function IsLoggedIn(){
+          return !empty($_SESSION['org']['id'])  && 
+                 !empty($_SESSION['user']['id']) && 
+                 !empty($_SESSION['token'])   && 
+                 self::UpdateAccessToken() === true; 
+       }
+       
+       
        /** 
         *  Make sure the password doesn't contain spaces and is 6 to 18 
         *  digits long
@@ -198,6 +374,17 @@
        }
        
        /** 
+        * Check if the organization name is valid
+        * That is, it contains at least 3 non-space characters
+        * @return bool true on valid organization name, false on failure
+        */
+       public static function ValidOrgName($org_name)
+       {    
+          //an organization can have spaces, but it should have at least 3 letters
+          return preg_match('/\\w\\w\\w/', $org_name);
+       }
+       
+       /** 
         * Create a new account (based on register.php)
         * The tricky part is we have to generate by educated guess the organization login
         * And not only that, but we have to ensure it is valid and not already taken
@@ -207,16 +394,21 @@
         */
        public static function NewAccount($plan, $full_name, $org_name, $email, $password)
        {
-            
+            if (!self::FetchPlan($plan)){
+              return self::CreateError('plan', 'invalid_plan', 'This plan does not exist. Please choose a plan');               
+            }
+
             if (!self::ValidFullName($full_name)){
               return self::CreateError('name', 'invalid_fullname', 'Please include your first and last name');               
             }
             
-            if (!self::FetchPlan($plan)){
-              return self::CreateError('plan', 'invalid_plan', 'This plan does not exist. Please choose a plan');               
+            if (!self::ValidOrgName($org_name)){
+              return self::CreateError('org_name', 
+                   'invalid_org_name', 
+                   'An organization name must contain at least 3 letters');
             }
             
-            $org_login = strtolower(preg_replace('/^\\d|[^\\w]/', '', preg_replace('/[\\s-]/', '_', $_POST['org_name'])));
+            $org_login = strtolower(preg_replace('/^\\d|[^\\w]/', '', preg_replace('/[\\s-]/', '_', $org_name)));
             if (!self::ValidOrgLogin($org_login)) {
                //if we get here, something is wrong with the above line ($org_login = strtolower...)
                //the programmer should be notified to always generate syntactically valid login names
@@ -256,6 +448,7 @@
                 }
            }        
        }
+       
        
        /**
         * Insert a new user into the database, must have a pre-existing organization

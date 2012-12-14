@@ -19,4 +19,7 @@ define("CRYPT_SALT", "<a-long-salt-string>");
 
 //use a number that your server can handle, the more iterations, the more secure the passwords
 define("CRYPT_ITERATIONS", 10);
+
+//how much time before your login token expires (after latest access)
+define("LOGIN_EXPIRE_INTERVAL", " INTERVAL 6 HOUR ");
 ?>

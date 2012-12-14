@@ -3,4 +3,15 @@
 <h1>ClearBugs</h1>
 Coming soon...
 
+<div>
+{{if !$logged_in}}
+   {include file="login_form.tmpl"}
+{{else}}
+   Logged in as {$smarty.session.user.username}@{$smarty.session.org.login}.
+   <ul>
+   <li><a href="main.php">Member Panel</a></li>
+   <li><a href="logout.php">Logout</a></li>
+   </ul>
+{{/if}}
+</div>
 {include file="footer.tmpl"}

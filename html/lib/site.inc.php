@@ -41,7 +41,6 @@
        public static function log($type, $message){  
            $session = isset($_SESSION) ? $_SESSION : array();
            
-           $s = '[dbdt:'.self::getDBDateTime().', phpdt: '.self::getPHPDateTime().'] - '.$message; 
            $prep = self::getPDO()->prepare("INSERT INTO log (id, ip, loggedin_user_id, loggedin_username, loggedin_email, 
                                                      date_created, type, details)
                                     VALUES (NULL, :ip, :loggedin_user_id, :loggedin_username, :loggedin_email, 
@@ -50,7 +49,7 @@
                                 ':loggedin_username'=> misc::val($session,'user','username'), 
                                 ':loggedin_email'=> misc::val($session,'user','email'), 
                                 ':type'=>$type, 
-                                ':details'=>$s));
+                                ':details'=>$message));
            return self::getPDO()->lastInsertId();
        }
     }

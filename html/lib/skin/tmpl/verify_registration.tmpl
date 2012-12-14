@@ -1,0 +1,31 @@
+{include file="header.tmpl" title="Thank you for verifying your registration"}
+<script src="lib/skin/js/jquery.placeholder.js"></script>
+<script src="lib/skin/js/verify.js"></script>
+<link href="lib/skin/css/form.css" rel="stylesheet" type="text/css" />
+{include file="form_messages.tmpl"}
+  <h3>Account Verified</h3>
+  <p>
+  Thank you for registering with ClearBugs
+  </p>
+  <table border=0 cellpadding=2 cellspacing=0>
+  <tr>
+  <td>Company/Organization: </td><td><b>{$verification.org_name}</b></td>
+  </tr>
+  <tr>
+  <td>Generated Login: </td><td><b>{$verification.org_login}</b></td>
+  </tr>
+  <tr>
+  <td>Primary User: </td><td><b>{$verification.username}</b></td>
+  </tr>
+  <tr>
+  <td>Primary Email: </td><td><b>{$verification.email}</b></td>
+  </tr>
+  </table>
+  <table border=0 cellpadding=2 cellspacing=0>
+  <tr>
+  <td>
+   {include file="login_form.tmpl" frm=$verification} 
+  </td>
+  </tr>
+  </table>
+{include file="footer.tmpl"}

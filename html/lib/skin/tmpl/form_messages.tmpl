@@ -1,0 +1,10 @@
+{{if !empty($error)}}
+<div class="error">
+Error: {$error.message}
+<script>
+$( function() { 
+    $('input[name={$error.form_field}]').addClass('error');
+} );
+</script>
+</div>
+{{/if}} 
